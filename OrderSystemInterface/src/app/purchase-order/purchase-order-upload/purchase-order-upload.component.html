@@ -1,0 +1,15 @@
+<p>
+  purchase-order-upload works!
+</p>
+<div ng2FileDrop
+     [ngClass]="{'nv-file-over': hasBaseDropZoneOver}"
+     (fileOver)="fileOverBase($event)"
+     [uploader]="uploader"
+     class="well my-drop-zone">
+  Base drop zone
+</div>
+<input type="file" ng2FileSelect [uploader]="uploader" />
+Number of files: {{uploader.queue.length}}
+{{ uploader.queue[0]?.file?.name }}
+
+<button (click)="upload()">Upload</button>

@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "purchase-order-service.sSERVER_UPLOAD_LOCATION_FOLDER",
+      "type": "java.lang.String",
+      "description": "Description for purchase-order-service.sSERVER_UPLOAD_LOCATION_FOLDER."
+    }
+  ]
+}
