@@ -22,3 +22,14 @@ server:
 services:
   purchaseorder:
     SERVER_UPLOAD_LOCATION_FOLDER: fileUploads
+#actuator endpoints disable all but the following
+# http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready-endpoints
+# http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#howto-use-actuator-with-jersey
+endpoints:
+  enabled: false
+  info:
+    enabled: true
+  health:
+    enabled: true
+  metrics:
+    enabled: true

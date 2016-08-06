@@ -1,6 +1,7 @@
 package services;
 
 import io.swagger.annotations.*;
+import org.activiti.engine.RuntimeService;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.slf4j.Logger;
@@ -18,11 +19,10 @@ import services.dao.PurchaseOrderDao;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,6 +40,8 @@ public class PurchaseOrderService {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
+    private RuntimeService runtimeService;
+    @Autowired
     private PurchaseOrderDao purchaseOrderDao;
     @Autowired
     private CustomerDao customerDao;
@@ -49,7 +51,8 @@ public class PurchaseOrderService {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @ApiOperation(value = "Creates a new purchase order for a customer", response = PurchaseOrder.class)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Purchase order created")
+            @ApiResponse(code = 200, message = "Purchase order created"),
+            @ApiResponse(code = 404, message = "Customer not found")
     })
     public Response createPurchasingOrder( @QueryParam("customerOrderID")
                                                @ApiParam(required = true) String customerOrderID,
@@ -57,6 +60,11 @@ public class PurchaseOrderService {
                                                 @ApiParam(required = true)  String customerName,
                                            @FormDataParam("file") InputStream fileInputStream,
                                            @FormDataParam("file") FormDataContentDisposition contentDispositionHeader){
+
+        //check that customer exists
+        if(!customerDao.exists(customerName)){
+            return Response.status(Response.Status.NOT_FOUND).entity("Customer not found").build();
+        }
 
         // save purchase order file
         String filePath = SERVER_UPLOAD_LOCATION_FOLDER + contentDispositionHeader.getFileName();
@@ -79,7 +87,13 @@ public class PurchaseOrderService {
         customer.addPurchaseOrder(po);
         customerDao.save(customer);
 
+        // create task for purchasing
+        Map<String, Object> variables = new HashMap<String, Object>();
+        variables.put("purchaseOrder", po.getOrderID());
+        variables.put("customer", customerName);
+        runtimeService.startProcessInstanceByKey("purchaseOrderSubmission",variables);
 
+        // create task for Junior
 
         return Response.ok(po,MediaType.APPLICATION_JSON_TYPE).build();
     }
@@ -87,9 +101,16 @@ public class PurchaseOrderService {
     @PUT
     @Path("/v1/{orderID}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response updatePurchasingOrder(@PathParam("orderID") String orderID,PurchaseOrder purchaseOrder){
+    @ApiOperation(value = "Update a purchase order", response = PurchaseOrder.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Purchase order updated"),
+            @ApiResponse(code = 404, message = "Order not found")
+    })
+    public Response updatePurchasingOrder( @ApiParam("Order to update") @PathParam("orderID") String orderID,PurchaseOrder purchaseOrder){
 
-        // TODO check that the purchase order exists
+        if(!purchaseOrderDao.exists(orderID)){
+            return Response.status(Response.Status.NOT_FOUND).entity("Order not found").build();
+        }
         // this will create/merge based on if the order already exists
         purchaseOrderDao.save(purchaseOrder);
         return Response.ok(purchaseOrder,MediaType.APPLICATION_JSON_TYPE).build();
@@ -116,6 +137,38 @@ public class PurchaseOrderService {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Path("v1/{orderID}/download")
+    @GET
+    @Produces({"application/pdf"})
+    @ApiOperation(value = "Download pdf for purchase order")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Purchase order downloaded"),
+            @ApiResponse(code = 404, message = "Order not found")
+    })
+    public Response getPDF(@ApiParam("Order to download pdf") @PathParam("orderID") String orderID) throws Exception {
+
+        if(!purchaseOrderDao.exists(orderID)){
+            return Response.status(Response.Status.NOT_FOUND).entity("Order not found").build();
+        }
+
+        return Response.ok(new StreamingOutput() {
+            public void write(OutputStream output) throws IOException, WebApplicationException {
+                try {
+                    File file = new File(purchaseOrderDao.findByOrderID(orderID).getScannedPDFLocation());
+                    FileInputStream fis = new FileInputStream(file);
+                    byte[] buffer = new byte[1024];
+                    int bytesRead;
+                    while ((bytesRead = fis.read(buffer)) != -1)
+                    {
+                        output.write(buffer, 0, bytesRead);
+                    }
+                } catch (Exception e) {
+                    throw new WebApplicationException(e);
+                }
+            }
+        }).build();
     }
 
 

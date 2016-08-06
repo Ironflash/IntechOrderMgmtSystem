@@ -4,7 +4,9 @@
 /** Map relative paths to URLs. */
 const map: any = {
   'ng2-file-upload':'vendor/ng2-file-upload',
-  'ng2-bootstrap': 'vendor/ng2-bootstrap'
+  'ng2-bootstrap': 'vendor/ng2-bootstrap',
+  'ng2-pdf-viewer': 'vendor/ng2-pdf-viewer',
+  'pdfjs-dist': 'vendor/pdfjs-dist'
 };
 
 /** User packages configuration. */
@@ -16,6 +18,13 @@ const packages: any = {
     format: 'cjs',
     defaultExtension: 'js',
     main: 'ng2-bootstrap.js'
+  },
+  'ng2-pdf-viewer': {
+    format: 'cjs',
+    main: 'dist/pdf-viewer.component.min.js'
+  },
+  'pdfjs-dist': {
+    format: 'cjs'
   }
 };
 

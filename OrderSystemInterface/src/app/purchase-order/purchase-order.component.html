@@ -1,4 +1,13 @@
 <p>
   purchase-order works!
 </p>
+<!--<div>-->
+  <!--<span class="attribute">Order Pdf: </span>-->
+  <!--<span class="value">-->
+    <!--<a href="api/purchaseOrder/v1/1bd145c7-63d1-4aff-96aa-44dd0942ff85/download"-->
+      <!--download="test.pdf" target="_blank">Click Here to Download</a>-->
+  <!--</span>-->
+<!--</div>-->
+<a class="btn" (click)="viewPDF()">View Order PDF</a>
+<pdf-viewer [src]="pdfSrc" [initialPage]="page" [original-size]="true" style="display: block;"></pdf-viewer>
 <router-outlet></router-outlet>

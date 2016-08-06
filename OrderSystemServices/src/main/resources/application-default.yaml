@@ -14,11 +14,13 @@ spring:
     application-path: /api
 logging:
   file: logs/dev_app.log
-  level:
-    org.springframework.web: DEBUG
-    guru.springframework.controllers: DEBUG
-    org.hibernate: DEBUG
+#  level:
+#    org.springframework.web: DEBUG
+#    guru.springframework.controllers: DEBUG
+#    org.hibernate: DEBUG
 server:
   port: 9000
+processEngineConfiguration:
+  databaseSchemaUpdate: create-drop
 purchase-order-service:
   sSERVER_UPLOAD_LOCATION_FOLDER: fileUploads

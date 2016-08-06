@@ -13,7 +13,9 @@ module.exports = function(defaults) {
       'rxjs/**/*.js',
       '@angular/**/*.js',
       'ng2-file-upload/**/*.js',
-      'ng2-bootstrap/**/*.js'
+      'ng2-bootstrap/**/*.js',
+      'ng2-pdf-viewer/**/*.js',
+      'pdfjs-dist/**/*.js'
     ]
   });
 };
