@@ -1,8 +1,8 @@
-package services.dao;
+package com.intechsouthwest.ordermanagementsystem.dao;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.transaction.annotation.Transactional;
-import services.domain.User;
+import com.intechsouthwest.ordermanagementsystem.domain.User;
 
 /**
  * Created by gregorylaflash on 7/31/16.
@@ -16,5 +16,7 @@ public interface UserDao extends CrudRepository<User, Long> {
      * automagically generated from its signature by Spring Data JPA.
      */
     public User findByEmail(String email);
+
+    public User findByName(String name);
 
 }

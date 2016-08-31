@@ -2,20 +2,195 @@
 <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
   <process id="purchaseOrderSubmission" name="Purchase order submission" isExecutable="true">
     <startEvent id="startevent1" name="Start"></startEvent>
-    <userTask id="purchasingReview" name="purchasing review"></userTask>
-    <sequenceFlow id="flow1" sourceRef="startevent1" targetRef="purchasingReview"></sequenceFlow>
+    <serviceTask id="cancelPurchaseOrder" name="Cancel Purchase Order" isForCompensation="true" activiti:class="com.intechsouthwest.ordermanagementsystem.workflowServices.CancelPurchaseOrder"></serviceTask>
+    <transaction id="transaction1" name="Transaction">
+      <userTask id="purchasingReview" name="Purchasing Review" activiti:candidateGroups="purchasing"></userTask>
+      <sequenceFlow id="sid-4369ED6F-D971-4555-A308-E8FAB0F7A8CA" sourceRef="purchasingReview" targetRef="sid-E3EC19B1-C866-44CE-9BFF-2EC1117C3C8E"></sequenceFlow>
+      <exclusiveGateway id="sid-E3EC19B1-C866-44CE-9BFF-2EC1117C3C8E"></exclusiveGateway>
+      <sequenceFlow id="flow15" sourceRef="sid-E3EC19B1-C866-44CE-9BFF-2EC1117C3C8E" targetRef="getCustomerSalesRep">
+        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${action == 'REJECT_PO'}]]></conditionExpression>
+      </sequenceFlow>
+      <serviceTask id="getCustomerSalesRep" name="Get Customer Sales Rep" activiti:class="com.intechsouthwest.ordermanagementsystem.workflowServices.GetCustomerSalesRep"></serviceTask>
+      <sequenceFlow id="flow16" sourceRef="getCustomerSalesRep" targetRef="renegotiateQuote"></sequenceFlow>
+      <userTask id="renegotiateQuote" name="Renegotiate Quote" activiti:assignee="${salesRep}" activiti:candidateGroups="sales"></userTask>
+      <userTask id="reviewAdjustment" name="Approve Price Adjustment" activiti:candidateGroups="admin"></userTask>
+      <sequenceFlow id="flow20" sourceRef="sid-E3EC19B1-C866-44CE-9BFF-2EC1117C3C8E" targetRef="reviewAdjustment">
+        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${action == 'ESCALATE'}]]></conditionExpression>
+      </sequenceFlow>
+      <exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway"></exclusiveGateway>
+      <sequenceFlow id="flow21" sourceRef="renegotiateQuote" targetRef="exclusivegateway1"></sequenceFlow>
+      <sequenceFlow id="flow22" sourceRef="exclusivegateway1" targetRef="purchasingReview">
+        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${action == 'APPROVE' || action == 'OFFER_CHANGE'}]]></conditionExpression>
+      </sequenceFlow>
+      <endEvent id="cancelendevent1" name="CancelEnd">
+        <cancelEventDefinition></cancelEventDefinition>
+      </endEvent>
+      <sequenceFlow id="flow23" sourceRef="exclusivegateway1" targetRef="cancelendevent1">
+        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${action='CANCEL_ORDER'}]]></conditionExpression>
+      </sequenceFlow>
+      <sequenceFlow id="flow28" sourceRef="reviewAdjustment" targetRef="purchasingReview"></sequenceFlow>
+      <serviceTask id="waitFotItemDelivery" name="Wait For Item Delivery" activiti:class="com.intechsouthwest.ordermanagementsystem.workflowServices.WaitForItemDelivery"></serviceTask>
+      <sequenceFlow id="flow29" sourceRef="sid-E3EC19B1-C866-44CE-9BFF-2EC1117C3C8E" targetRef="waitFotItemDelivery">
+        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${action == 'COMPLETE_PO'}]]></conditionExpression>
+      </sequenceFlow>
+      <sequenceFlow id="flow30" sourceRef="waitFotItemDelivery" targetRef="endevent1"></sequenceFlow>
+      <endEvent id="endevent1" name="End"></endEvent>
+      <startEvent id="startevent2" name="Start"></startEvent>
+      <sequenceFlow id="flow35" sourceRef="startevent2" targetRef="purchasingReview"></sequenceFlow>
+    </transaction>
+    <boundaryEvent id="boundaryerror1" name="Error" attachedToRef="transaction1">
+      <errorEventDefinition></errorEventDefinition>
+    </boundaryEvent>
+    <boundaryEvent id="boundarycancel1" name="Cancel" attachedToRef="transaction1" cancelActivity="true">
+      <cancelEventDefinition></cancelEventDefinition>
+    </boundaryEvent>
+    <sequenceFlow id="flow19" sourceRef="startevent1" targetRef="transaction1"></sequenceFlow>
+    <sequenceFlow id="flow24" sourceRef="boundarycancel1" targetRef="cancelPurchaseOrder"></sequenceFlow>
+    <serviceTask id="mailtask1" name="Mail Task" activiti:type="mail">
+      <extensionElements>
+        <activiti:field name="to">
+          <activiti:string><![CDATA[gregorylaflash@gmail.com]]></activiti:string>
+        </activiti:field>
+        <activiti:field name="from">
+          <activiti:string><![CDATA[gregorylaflash@gmail.com]]></activiti:string>
+        </activiti:field>
+        <activiti:field name="subject">
+          <activiti:string><![CDATA[Error Ocurred during Order Submission]]></activiti:string>
+        </activiti:field>
+        <activiti:field name="html">
+          <activiti:string><![CDATA[<h1>Test</h1>]]></activiti:string>
+        </activiti:field>
+      </extensionElements>
+    </serviceTask>
+    <sequenceFlow id="flow26" sourceRef="boundaryerror1" targetRef="mailtask1"></sequenceFlow>
+    <endEvent id="terminateendevent1" name="TerminateEndEvent">
+      <terminateEventDefinition></terminateEventDefinition>
+    </endEvent>
+    <sequenceFlow id="flow32" sourceRef="cancelPurchaseOrder" targetRef="terminateendevent1"></sequenceFlow>
+    <sequenceFlow id="flow33" sourceRef="transaction1" targetRef="terminateendevent1"></sequenceFlow>
+    <sequenceFlow id="flow34" sourceRef="mailtask1" targetRef="cancelPurchaseOrder"></sequenceFlow>
   </process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_purchaseOrderSubmission">
     <bpmndi:BPMNPlane bpmnElement="purchaseOrderSubmission" id="BPMNPlane_purchaseOrderSubmission">
       <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
-        <omgdc:Bounds height="35.0" width="35.0" x="90.0" y="170.0"></omgdc:Bounds>
+        <omgdc:Bounds height="35.0" width="35.0" x="40.0" y="320.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="cancelPurchaseOrder" id="BPMNShape_cancelPurchaseOrder">
+        <omgdc:Bounds height="66.0" width="105.0" x="680.0" y="354.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="transaction1" id="BPMNShape_transaction1">
+        <omgdc:Bounds height="431.0" width="507.0" x="115.0" y="91.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="purchasingReview" id="BPMNShape_purchasingReview">
-        <omgdc:Bounds height="55.0" width="105.0" x="170.0" y="160.0"></omgdc:Bounds>
+        <omgdc:Bounds height="55.0" width="105.0" x="198.0" y="306.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge bpmnElement="flow1" id="BPMNEdge_flow1">
-        <omgdi:waypoint x="125.0" y="187.0"></omgdi:waypoint>
-        <omgdi:waypoint x="170.0" y="187.0"></omgdi:waypoint>
+      <bpmndi:BPMNShape bpmnElement="sid-E3EC19B1-C866-44CE-9BFF-2EC1117C3C8E" id="BPMNShape_sid-E3EC19B1-C866-44CE-9BFF-2EC1117C3C8E">
+        <omgdc:Bounds height="40.0" width="40.0" x="360.0" y="313.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="getCustomerSalesRep" id="BPMNShape_getCustomerSalesRep">
+        <omgdc:Bounds height="65.0" width="105.0" x="328.0" y="233.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="renegotiateQuote" id="BPMNShape_renegotiateQuote">
+        <omgdc:Bounds height="55.0" width="105.0" x="328.0" y="153.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="reviewAdjustment" id="BPMNShape_reviewAdjustment">
+        <omgdc:Bounds height="61.0" width="105.0" x="328.0" y="413.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway1" id="BPMNShape_exclusivegateway1">
+        <omgdc:Bounds height="40.0" width="40.0" x="230.0" y="160.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="cancelendevent1" id="BPMNShape_cancelendevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="233.0" y="110.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="waitFotItemDelivery" id="BPMNShape_waitFotItemDelivery">
+        <omgdc:Bounds height="55.0" width="105.0" x="428.0" y="306.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent1" id="BPMNShape_endevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="578.0" y="316.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="startevent2" id="BPMNShape_startevent2">
+        <omgdc:Bounds height="35.0" width="35.0" x="130.0" y="316.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="boundaryerror1" id="BPMNShape_boundaryerror1">
+        <omgdc:Bounds height="30.0" width="30.0" x="608.0" y="468.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="boundarycancel1" id="BPMNShape_boundarycancel1">
+        <omgdc:Bounds height="30.0" width="30.0" x="608.0" y="373.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="mailtask1" id="BPMNShape_mailtask1">
+        <omgdc:Bounds height="55.0" width="105.0" x="680.0" y="448.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="terminateendevent1" id="BPMNShape_terminateendevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="770.0" y="290.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="sid-4369ED6F-D971-4555-A308-E8FAB0F7A8CA" id="BPMNEdge_sid-4369ED6F-D971-4555-A308-E8FAB0F7A8CA">
+        <omgdi:waypoint x="303.0" y="333.0"></omgdi:waypoint>
+        <omgdi:waypoint x="360.0" y="333.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow15" id="BPMNEdge_flow15">
+        <omgdi:waypoint x="380.0" y="313.0"></omgdi:waypoint>
+        <omgdi:waypoint x="380.0" y="298.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow16" id="BPMNEdge_flow16">
+        <omgdi:waypoint x="380.0" y="233.0"></omgdi:waypoint>
+        <omgdi:waypoint x="380.0" y="208.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow20" id="BPMNEdge_flow20">
+        <omgdi:waypoint x="380.0" y="353.0"></omgdi:waypoint>
+        <omgdi:waypoint x="380.0" y="413.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow21" id="BPMNEdge_flow21">
+        <omgdi:waypoint x="328.0" y="180.0"></omgdi:waypoint>
+        <omgdi:waypoint x="270.0" y="180.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow22" id="BPMNEdge_flow22">
+        <omgdi:waypoint x="250.0" y="200.0"></omgdi:waypoint>
+        <omgdi:waypoint x="250.0" y="306.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow23" id="BPMNEdge_flow23">
+        <omgdi:waypoint x="250.0" y="160.0"></omgdi:waypoint>
+        <omgdi:waypoint x="250.0" y="145.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow28" id="BPMNEdge_flow28">
+        <omgdi:waypoint x="328.0" y="443.0"></omgdi:waypoint>
+        <omgdi:waypoint x="250.0" y="443.0"></omgdi:waypoint>
+        <omgdi:waypoint x="250.0" y="361.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow29" id="BPMNEdge_flow29">
+        <omgdi:waypoint x="400.0" y="333.0"></omgdi:waypoint>
+        <omgdi:waypoint x="428.0" y="333.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow30" id="BPMNEdge_flow30">
+        <omgdi:waypoint x="533.0" y="333.0"></omgdi:waypoint>
+        <omgdi:waypoint x="578.0" y="333.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow35" id="BPMNEdge_flow35">
+        <omgdi:waypoint x="165.0" y="333.0"></omgdi:waypoint>
+        <omgdi:waypoint x="198.0" y="333.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow19" id="BPMNEdge_flow19">
+        <omgdi:waypoint x="75.0" y="337.0"></omgdi:waypoint>
+        <omgdi:waypoint x="115.0" y="306.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow24" id="BPMNEdge_flow24">
+        <omgdi:waypoint x="638.0" y="388.0"></omgdi:waypoint>
+        <omgdi:waypoint x="680.0" y="387.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow26" id="BPMNEdge_flow26">
+        <omgdi:waypoint x="638.0" y="483.0"></omgdi:waypoint>
+        <omgdi:waypoint x="680.0" y="475.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow32" id="BPMNEdge_flow32">
+        <omgdi:waypoint x="732.0" y="354.0"></omgdi:waypoint>
+        <omgdi:waypoint x="787.0" y="325.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow33" id="BPMNEdge_flow33">
+        <omgdi:waypoint x="622.0" y="306.0"></omgdi:waypoint>
+        <omgdi:waypoint x="770.0" y="307.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow34" id="BPMNEdge_flow34">
+        <omgdi:waypoint x="732.0" y="448.0"></omgdi:waypoint>
+        <omgdi:waypoint x="732.0" y="420.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

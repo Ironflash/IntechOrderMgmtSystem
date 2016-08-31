@@ -9,7 +9,7 @@
 	<packaging>jar</packaging>
 
 	<name>OrderSystemServices</name>
-	<description>Back end services for order system</description>
+	<description>Back end com.intechsouthwest.ordermanagementsystem.services for order system</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -42,6 +42,11 @@
 			<artifactId>activiti-spring-boot-starter-actuator</artifactId>
 			<version>5.21.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.activiti</groupId>
+			<artifactId>activiti-image-generator</artifactId>
+			<version>5.21.0</version>
+		</dependency>
 		<!--<dependency>-->
 			<!--<groupId>org.springframework.boot</groupId>-->
 			<!--<artifactId>spring-boot-starter-data-elasticsearch</artifactId>-->
@@ -66,6 +71,11 @@
 			<groupId>org.springframework.retry</groupId>
 			<artifactId>spring-retry</artifactId>
 			<version>1.1.3.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security.kerberos</groupId>
+			<artifactId>spring-security-kerberos-web</artifactId>
+			<version>1.0.1.RELEASE</version>
 		</dependency>
 		<!--<dependency>-->
 			<!--<groupId>org.springframework.boot</groupId>-->
@@ -124,6 +134,18 @@
 			<version>1.5.9</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>2.0.99-beta</version>
+			<type>pom</type>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>1.3.168</version>
+			<scope>test</scope>
+		</dependency>
 
 	</dependencies>
 

@@ -1,8 +1,7 @@
-package services.dao;
+package com.intechsouthwest.ordermanagementsystem.dao;
 
 import org.springframework.data.repository.CrudRepository;
-import services.domain.Customer;
-import services.domain.PurchaseOrder;
+import com.intechsouthwest.ordermanagementsystem.domain.Customer;
 
 /**
  * Created by gregorylaflash on 7/31/16.

@@ -1,7 +1,6 @@
-package services;
+package com.intechsouthwest.ordermanagementsystem;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 /**
  * Created by gregorylaflash on 8/3/16.

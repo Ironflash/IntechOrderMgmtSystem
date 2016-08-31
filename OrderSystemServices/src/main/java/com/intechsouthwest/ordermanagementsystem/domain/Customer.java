@@ -1,4 +1,4 @@
-package services.domain;
+package com.intechsouthwest.ordermanagementsystem.domain;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -16,6 +16,11 @@ public class Customer {
     @Basic
     @NotNull
     private String name;
+
+    @Basic
+    @NotNull
+    @Column(name = "is_frozen")
+    private Boolean isFrozen = false;
 
     @Embedded
     private Address billingAddress;
@@ -47,6 +52,11 @@ public class Customer {
     @OneToMany(fetch=FetchType.EAGER)
     @JoinColumn(name = "customer_name")
     private List<PurchaseOrder> purchaseOrders;
+
+    @Basic
+    @NotNull
+    @Column(name = "sales_representative")
+    private String salesRepresentative;
 
 //    quotes
 
@@ -87,9 +97,25 @@ public class Customer {
         this.technicalSupportContact = technicalSupportContact;
     }
 
+    public Boolean getFrozen() {
+        return isFrozen;
+    }
+
+    public void setFrozen(Boolean frozen) {
+        isFrozen = frozen;
+    }
+
     // -------------
 
     public void addPurchaseOrder(PurchaseOrder po) {
         purchaseOrders.add(po);
+    }
+
+    public String getSalesRepresentative() {
+        return salesRepresentative;
+    }
+
+    public void setSalesRepresentative(String salesRepresentative) {
+        this.salesRepresentative = salesRepresentative;
     }
 }

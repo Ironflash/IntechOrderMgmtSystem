@@ -1,4 +1,4 @@
-package services.domain;
+package com.intechsouthwest.ordermanagementsystem.domain;
 
 
 import javax.persistence.*;

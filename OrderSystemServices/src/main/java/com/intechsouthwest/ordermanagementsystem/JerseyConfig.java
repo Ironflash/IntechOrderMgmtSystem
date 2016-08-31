@@ -1,5 +1,7 @@
-package services;
+package com.intechsouthwest.ordermanagementsystem;
 
+import com.intechsouthwest.ordermanagementsystem.services.PurchaseOrderService;
+import com.intechsouthwest.ordermanagementsystem.services.UserService;
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.listing.ApiListingResource;
 import io.swagger.jaxrs.listing.SwaggerSerializers;
@@ -47,7 +49,7 @@ public class JerseyConfig extends ResourceConfig {
         config.setContact("Gregory LaFlash");
         config.setSchemes(new String[] { "http", "https" });
         config.setBasePath(this.apiPath);
-        config.setResourcePackage("services");
+        config.setResourcePackage("com.intechsouthwest.ordermanagementsystem");
         config.setPrettyPrint(true);
         config.setScan(true);
     }

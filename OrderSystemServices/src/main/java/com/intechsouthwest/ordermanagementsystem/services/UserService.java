@@ -1,8 +1,13 @@
-package services;
+package com.intechsouthwest.ordermanagementsystem.services;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import org.activiti.engine.IdentityService;
 import org.springframework.stereotype.Component;
-import services.domain.User;
-import services.dao.UserDao;
+import com.intechsouthwest.ordermanagementsystem.domain.User;
+import com.intechsouthwest.ordermanagementsystem.dao.UserDao;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.constraints.NotNull;
@@ -15,7 +20,11 @@ import javax.ws.rs.QueryParam;
  */
 @Component
 @Path("/user")
+@Api(value = "User", produces = "application/json")
 public class UserService {
+
+    @Autowired
+    IdentityService identityService;
 
     /**
      * GET /create  --> Create a new user and save it in the database.
@@ -58,7 +67,16 @@ public class UserService {
      */
     @GET
     @Path("/get-by-email")
+    @ApiOperation(value = "Gets a user", response = User.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "User retrieved"),
+            @ApiResponse(code = 412, message = "Pre-condition not met")
+    })
     public String getByEmail(@QueryParam("email") @NotNull String email) {
+
+        org.activiti.engine.identity.User user1 = identityService.createUserQuery().userEmail(email).singleResult();
+
+
         String userId = "";
         try {
             User user = userDao.findByEmail(email);

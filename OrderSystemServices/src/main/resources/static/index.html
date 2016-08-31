@@ -30,6 +30,22 @@
   <!-- <script src='lang/en.js' type='text/javascript'></script> -->
 
   <script type="text/javascript">
+
+    var getCookie = function(cname) {
+      var name = cname + "=";
+      var ca = document.cookie.split(';');
+      for(var i = 0; i <ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') {
+          c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+          return c.substring(name.length,c.length);
+        }
+      }
+      return "";
+    };
+
     $(function () {
       var url = window.location.search.match(/url=([^&]+)/);
       if (url && url.length > 1) {
@@ -45,6 +61,14 @@
       window.swaggerUi = new SwaggerUi({
         url: url,
         dom_id: "swagger-ui-container",
+        authorizations: {
+          SpringSecurity: function() {
+            // This function will get called /before/ each request
+            // ... UNLESS you have a 'security' tag in the swagger.json file, in which case you must add 'someName' to the list of auths.
+            this.headers['X-XSRF-TOKEN'] = getCookie("XSRF-TOKEN"); // Example header
+            return true; // there is a bug, fixed but not in develop_2.0 where returning true will only process _one_ interceptor, you can leave this if it's your only interceptor and when the fix is in, it'll work as expected
+          }
+        },
         supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
         onComplete: function(swaggerApi, swaggerUi){
           if(typeof initOAuth == "function") {

@@ -1,7 +1,5 @@
 drop table intechordersystem.ACT_GE_PROPERTY cascade;
 drop table intechordersystem.ACT_RU_VARIABLE cascade;
-drop table intechordersystem.ACT_GE_BYTEARRAY cascade;
-drop table intechordersystem.ACT_RE_DEPLOYMENT cascade;
 drop table intechordersystem.ACT_RU_IDENTITYLINK cascade;
 drop table intechordersystem.ACT_RU_TASK cascade;
 drop table intechordersystem.ACT_RE_PROCDEF cascade;
@@ -18,3 +16,8 @@ drop table intechordersystem.ACT_HI_DETAIL cascade;
 drop table intechordersystem.ACT_HI_COMMENT cascade;
 drop table intechordersystem.ACT_HI_ATTACHMENT cascade;
 drop table intechordersystem.ACT_RU_EVENT_SUBSCR cascade;
+drop table intechordersystem.ACT_EVENT_LOG cascade;
+DROP TABLE `intechordersystem`.`ACT_HI_IDENTITYLINK`, `intechordersystem`.`ACT_HI_VARINST`, `intechordersystem`.`ACT_PROCDEF_INFO`;
+DROP TABLE `intechordersystem`.`ACT_RE_MODEL`, `intechordersystem`.`ACT_RE_PROCDEF`, `intechordersystem`.`ACT_RU_EXECUTION`;
+drop table intechordersystem.ACT_GE_BYTEARRAY cascade;
+drop table intechordersystem.ACT_RE_DEPLOYMENT cascade;

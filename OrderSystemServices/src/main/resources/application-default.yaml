@@ -22,5 +22,6 @@ server:
   port: 9000
 processEngineConfiguration:
   databaseSchemaUpdate: create-drop
+  historyLevel: full
 purchase-order-service:
-  sSERVER_UPLOAD_LOCATION_FOLDER: fileUploads
+  SERVER_UPLOAD_LOCATION_FOLDER: fileUploads

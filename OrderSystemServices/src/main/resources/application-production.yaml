@@ -19,7 +19,7 @@ logging:
     org.hibernate: DEBUG
 server:
   port: 9000
-services:
+com.intechsouthwest.ordermanagementsystem.services:
   purchaseorder:
     SERVER_UPLOAD_LOCATION_FOLDER: fileUploads
 #actuator endpoints disable all but the following
@@ -33,3 +33,5 @@ endpoints:
     enabled: true
   metrics:
     enabled: true
+processEngineConfiguration:
+  historyLevel: full
